@@ -24,26 +24,12 @@ def score_2(list_of_score_number):
     return list_of_score_number
 
 
-# calculate numbers of score 3
-def score_3(list_of_score_number):
-    list_of_score_number[3] = list_of_score_number[3] + 1
-    return list_of_score_number
-
-
-# calculate numbers of score 4
-def score_4(list_of_score_number):
-    list_of_score_number[4] = list_of_score_number[4] + 1
-    return list_of_score_number
-
-
 # calculate numbers of scores
 def scoring(list_of_score_number, num_score):
     scores = {
-        0: score_0,
-        1: score_1,
-        2: score_2,
-        3: score_3,
-        4: score_4
+        '危险': score_0,
+        '一般': score_1,
+        '安全': score_2
     }
 
     method = scores.get(num_score, 0)
@@ -52,7 +38,7 @@ def scoring(list_of_score_number, num_score):
 
 
 # method to test.py the password strength meter of reddit.com
-def test_reddit():
+def test_12306():
     chrome_options = Options()
     # chrome_options.add_argument('--headless')
 
@@ -71,7 +57,7 @@ def test_reddit():
 
     current_dir = os.path.abspath('.')
 
-    driver.get('file:///' + current_dir + '/reddit_%20the%20front%20page%20of%20the%20internet.html')
+    driver.get('file:///' + current_dir + '/中国铁路12306.html')
 
     # wait.until(EC.presence_of_element_located((By.ID, 'regPassword')))
 
@@ -79,49 +65,48 @@ def test_reddit():
 
     driver.execute_script("window.stop();")  # stop loading the web page
 
-    driver.switch_to.frame(5)  # 5 means the 6th frame
-
     file_score = open(current_dir + '/score.txt', 'w', encoding='utf-8')
 
     file_passwd = open(current_dir + "/7k7k-1.txt", encoding='utf-8')
     line = file_passwd.readline()
 
+    for i in range(1, 61721):
+        line = file_passwd.readline()
+
     num_of_passwds = 0
-    list_of_score_numbers = [0, 0, 0, 0, 0]  # a list of every score's number, score ranges from 0 to 4
+    list_of_score_numbers = [0, 0, 0]  # a list of every score's number, score ranges from 0 to 2
 
     # if EC.presence_of_element_located((By.ID, 'regPassword')):
-    passwd_input = driver.find_element_by_id("regPassword")  # find the text box to input password
+    passwd_input = driver.find_element_by_id("passWord")  # find the text box to input password
 
     # if EC.presence_of_element_located((By.CLASS_NAME, 'PasswordMeter')):
-    password_meter = driver.find_element_by_class_name('PasswordMeter')
+    password_meter = driver.find_element_by_id('_div_password_rank')
 
     while line:
         password = re.findall(r'\t(.+)', line)  # choose the part after a tab in a line as the password
-        file_score.write(str(password) + '\t')
+        file_score.write(str(password[0]) + '\t')
         num_of_passwds = num_of_passwds + 1
 
-        passwd_input.send_keys(password)  # input password
+        passwd_input.send_keys(password[0])  # input password
 
         # get score of the password
-        score = password_meter.get_attribute('data-strength')
+        score = password_meter.get_attribute('title')
         file_score.write(str(score) + "\n")
 
         # calculate the number of this score
-        list_of_score_numbers = scoring(list_of_score_numbers, int(str(score)))
+        list_of_score_numbers = scoring(list_of_score_numbers, str(score))
 
         passwd_input.clear()
         line = file_passwd.readline()
 
     file_score.write('\n\nNumber of tasted passwords' + '\t' + str(num_of_passwds) + '\n\n')
-    file_score.write('Score range\t0 to 4\n')
+    file_score.write('Score range\t危险\t一般\t安全\n')
     file_score.write('Score' + '\t' + 'Number of passwords' + '\n')
-    file_score.write('0' + '\t\t' + str(list_of_score_numbers[0]) + '\n')
-    file_score.write('1' + '\t\t' + str(list_of_score_numbers[1]) + '\n')
-    file_score.write('2' + '\t\t' + str(list_of_score_numbers[2]) + '\n')
-    file_score.write('3' + '\t\t' + str(list_of_score_numbers[3]) + '\n')
-    file_score.write('4' + '\t\t' + str(list_of_score_numbers[4]) + '\n')
+    file_score.write('危险(Dangerous)' + '\t\t' + str(list_of_score_numbers[0]) + '\n')
+    file_score.write('一般(Ordinary)' + '\t\t' + str(list_of_score_numbers[1]) + '\n')
+    file_score.write('安全(Safe)' + '\t\t' + str(list_of_score_numbers[2]) + '\n')
 
     driver.close()
 
 
-test_reddit()
+test_12306()

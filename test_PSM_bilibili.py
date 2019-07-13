@@ -39,11 +39,11 @@ def score_4(list_of_score_number):
 # calculate numbers of scores
 def scoring(list_of_score_number, num_score):
     scores = {
-        0: score_0,
-        1: score_1,
-        2: score_2,
-        3: score_3,
-        4: score_4
+        '0': score_0,
+        '1': score_1,
+        '2': score_2,
+        '3': score_3,
+        '4': score_4
     }
 
     method = scores.get(num_score, 0)
@@ -52,7 +52,7 @@ def scoring(list_of_score_number, num_score):
 
 
 # method to test.py the password strength meter of reddit.com
-def test_reddit():
+def test_bilibili():
     chrome_options = Options()
     # chrome_options.add_argument('--headless')
 
@@ -71,7 +71,10 @@ def test_reddit():
 
     current_dir = os.path.abspath('.')
 
-    driver.get('file:///' + current_dir + '/reddit_%20the%20front%20page%20of%20the%20internet.html')
+    driver.get('file:///' + current_dir + '/'
+                                          '%E5%93%94%E5%93%A9%E5%93%94%E5%93%A9%E5%BC%B9%E5%B9%95%E8%A7%86%E9%A2%91%E'
+                                          '7%BD%91%20-%20(%20%E3%82%9C-%20%E3%82%9C)%E3%81%A4%E3%83%AD%20%E4%B9%BE%E6%9'
+                                          'D%AF_%20-%20bilibili.html#/phone')
 
     # wait.until(EC.presence_of_element_located((By.ID, 'regPassword')))
 
@@ -79,35 +82,51 @@ def test_reddit():
 
     driver.execute_script("window.stop();")  # stop loading the web page
 
-    driver.switch_to.frame(5)  # 5 means the 6th frame
+    # driver.switch_to.frame(5)  # 5 means the 6th frame
 
     file_score = open(current_dir + '/score.txt', 'w', encoding='utf-8')
 
-    file_passwd = open(current_dir + "/7k7k-1.txt", encoding='utf-8')
+    file_passwd = open(current_dir + "/test.txt", encoding='utf-8')
     line = file_passwd.readline()
+
+    for i in range(1, 76853):
+        line = file_passwd.readline()
 
     num_of_passwds = 0
     list_of_score_numbers = [0, 0, 0, 0, 0]  # a list of every score's number, score ranges from 0 to 4
 
     # if EC.presence_of_element_located((By.ID, 'regPassword')):
-    passwd_input = driver.find_element_by_id("regPassword")  # find the text box to input password
+    passwd_input = driver.find_element_by_name("userpwd")  # find the text box to input password
 
-    # if EC.presence_of_element_located((By.CLASS_NAME, 'PasswordMeter')):
-    password_meter = driver.find_element_by_class_name('PasswordMeter')
+    passwd_input.send_keys('0')
+    passwd_input.clear()
 
     while line:
         password = re.findall(r'\t(.+)', line)  # choose the part after a tab in a line as the password
-        file_score.write(str(password) + '\t')
+        file_score.write(str(password[0]) + '\t')
         num_of_passwds = num_of_passwds + 1
 
-        passwd_input.send_keys(password)  # input password
+        passwd_input.send_keys(password[0])  # input password
+
+        # if EC.presence_of_element_located((By.CLASS_NAME, 'PasswordMeter')):
+        password_meter = driver.find_element_by_class_name('a_pw').find_elements_by_tag_name('div')
 
         # get score of the password
-        score = password_meter.get_attribute('data-strength')
-        file_score.write(str(score) + "\n")
+        if password_meter[4].get_attribute('class') != 'safe_line e7e7e7e':
+            score = '4'
+        elif password_meter[3].get_attribute('class') != 'safe_line e7e7e7e':
+            score = '3'
+        elif password_meter[2].get_attribute('class') != 'safe_line e7e7e7e':
+            score = '2'
+        elif password_meter[1].get_attribute('class') != 'safe_line e7e7e7e':
+            score = '1'
+        elif password_meter[0].get_attribute('class') != 'safe_line e7e7e7e':
+            score = '0'
+
+        file_score.write(score + "\n")
 
         # calculate the number of this score
-        list_of_score_numbers = scoring(list_of_score_numbers, int(str(score)))
+        list_of_score_numbers = scoring(list_of_score_numbers, score)
 
         passwd_input.clear()
         line = file_passwd.readline()
@@ -124,4 +143,4 @@ def test_reddit():
     driver.close()
 
 
-test_reddit()
+test_bilibili()
